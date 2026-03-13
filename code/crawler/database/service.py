@@ -84,36 +84,36 @@ class RawService:
 
 
 
-    def release_stuck_tasks(self, hours_stuck: int = 12):
-        """
-        Giải phóng các bản ghi bị kẹt (đã start nhưng chưa end sau `hours_stuck` giờ).
-        Đưa crawl_detail_started_at về None để quét lại.
-        """
-        try:
-            threshold_time = datetime.now() - timedelta(hours=hours_stuck)
+    # def release_stuck_tasks(self, hours_stuck: int = 12):
+    #     """
+    #     Giải phóng các bản ghi bị kẹt (đã start nhưng chưa end sau `hours_stuck` giờ).
+    #     Đưa crawl_detail_started_at về None để quét lại.
+    #     """
+    #     try:
+    #         threshold_time = datetime.now() - timedelta(hours=hours_stuck)
             
-            stmt = (
-                update(Raw)
-                .where(
-                    Raw.crawl_detail_started_at.isnot(None),
-                    Raw.crawl_detail_ended_at.is_(None),
-                    Raw.crawl_detail_started_at <= threshold_time
-                )
-                .values(crawl_detail_started_at=None)
-            )
+    #         stmt = (
+    #             update(Raw)
+    #             .where(
+    #                 Raw.crawl_detail_started_at.isnot(None),
+    #                 Raw.crawl_detail_ended_at.is_(None),
+    #                 Raw.crawl_detail_started_at <= threshold_time
+    #             )
+    #             .values(crawl_detail_started_at=None)
+    #         )
             
-            result = self.db.execute(stmt)
-            self.db.commit()
+    #         result = self.db.execute(stmt)
+    #         self.db.commit()
             
-            released_count = result.rowcount
-            if released_count > 0:
-                logger.success(f"🔄 Đã giải phóng {released_count} bản ghi bị kẹt trên {hours_stuck} giờ.")
-            else:
-                logger.info(f"✨ Không có bản ghi nào bị kẹt quá {hours_stuck} giờ.")
+    #         released_count = result.rowcount
+    #         if released_count > 0:
+    #             logger.success(f"🔄 Đã giải phóng {released_count} bản ghi bị kẹt trên {hours_stuck} giờ.")
+    #         else:
+    #             logger.info(f"✨ Không có bản ghi nào bị kẹt quá {hours_stuck} giờ.")
                 
-            return released_count
+    #         return released_count
             
-        except Exception as e:
-            logger.error(f"❌ Lỗi khi giải phóng task bị kẹt: {e}")
-            self.db.rollback()
-            return 0
+    #     except Exception as e:
+    #         logger.error(f"❌ Lỗi khi giải phóng task bị kẹt: {e}")
+    #         self.db.rollback()
+    #         return 0
